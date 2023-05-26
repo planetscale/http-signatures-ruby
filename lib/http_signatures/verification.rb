@@ -20,7 +20,11 @@ module HttpSignatures
     private
 
     def signature_header_present?
-      @message.key?("Signature")
+      if @message.respond_to?(:headers)
+        @message.headers.key?('Signature')
+      else
+        @message.key?('Signature')
+      end
     end
 
     def provided_signature_base64
@@ -44,8 +48,11 @@ module HttpSignatures
     end
 
     def fetch_header(name)
-      @message.fetch(name)
+      if @message.respond_to?(:headers)
+        @message.headers.fetch(name)
+      else
+        @message.fetch(name)
+      end
     end
-
   end
 end

@@ -15,17 +15,18 @@ module HttpSignatures
     end
 
     def header_value(header)
-      if header == REQUEST_TARGET
-        request_target
+      return request_target if header == REQUEST_TARGET
+
+      if @message.respond_to?(:headers)
+        @message.headers.fetch(header) { raise HeaderNotInMessage, header }
       else
         @message.fetch(header) { raise HeaderNotInMessage, header }
       end
     end
 
     def request_target
-      "%s %s" % [@message.method.downcase, @message.path]
+      "%s %s" % [@message.method.downcase, @message.try(:original_fullpath) || @message.path]
     end
-
   end
 
   class HeaderNotInMessage < StandardError
